@@ -21,15 +21,25 @@ pipeline {
       ENVIRONMENT = getEnvironment()
   }
   stages {
-      stage ('Create Image') {
+    stage ('Create Image') {
+        steps {
+            script {
+            def imageTag = "${IMAGE_TAG}"
+            def imageName = "${IMAGE_NAME}:${imageTag}"
+            def repositoryName = "${AWS_ACCOUNT}.dkr.ecr.${AWS_REGION}.amazonaws.com/${imageName}"
+            sh "\$(aws ecr get-login --no-include-email --region ${AWS_REGION})"
+            sh "docker build -t ${imageName} ."
+            sh "docker tag ${imageName} ${repositoryName}"
+            }
+        }
+    }
+    stage ('Push Image') {
       steps {
         script {
           def imageTag = "${IMAGE_TAG}"
           def imageName = "${IMAGE_NAME}:${imageTag}"
           def repositoryName = "${AWS_ACCOUNT}.dkr.ecr.${AWS_REGION}.amazonaws.com/${imageName}"
-          sh "\$(aws ecr get-login --no-include-email --region ${AWS_REGION})"
-          sh "docker build -t ${imageName} ."
-          sh "docker tag ${imageName} ${repositoryName}"
+          sh "docker push ${repositoryName}"
         }
       }
     }
