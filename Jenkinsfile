@@ -13,36 +13,56 @@ def jsonParse(def json) {
 
 pipeline {
   agent any
+  environment {
+      IMAGE_NAME = 'caleidos/yor-web'
+      AWS_REGION = 'us-east-1'
+      AWS_ACCOUNT = '033686261524'
+      IMAGE_TAG = getShortCommitId()
+      ENVIRONMENT = getEnvironment()
+  }
   stages {
-    stage("Building Artifact") { 
-      steps { 
-        sh ''' 
-        #!/bin/bash -xe 
-        cd $WORKSPACE 
-        zip -r $BUILD_TAG.zip * 
-        ''' 
-      } 
-    }
-    stage("Uploading S3 Artifact") { 
-      steps { 
-        sh ''' 
-        #!/bin/bash -xe 
-        aws s3 mv $BUILD_TAG.zip s3://ci-workshop-devops/yor/Artifact/ --region us-east-1 
-        ''' 
-      } 
-    }
-    stage("Deploy") {
+      stage ('Create Image') {
       steps {
         script {
-          DEPLOYMENT_ID = sh (returnStdout: true, script: 'aws deploy create-deployment --application-name Yor --deployment-group-name DEV --s3-location bucket=ci-workshop-devops,key=yor/Artifact/$BUILD_TAG.zip,bundleType=zip --file-exists-behavior OVERWRITE --region us-east-1').trim()     
-          DEPLOYMENT_OBJECT = jsonParse(DEPLOYMENT_ID)
-          echo "Deployment-object is => ${DEPLOYMENT_ID}"
-          echo "Deployment-Id is => ${DEPLOYMENT_OBJECT.deploymentId}"
-        }
-        timeout(time: 5, unit: 'MINUTES'){                                         
-            awaitDeploymentCompletion("${DEPLOYMENT_OBJECT.deploymentId}")
+          def imageTag = "${IMAGE_TAG}"
+          def imageName = "${IMAGE_NAME}:${imageTag}"
+          def repositoryName = "${AWS_ACCOUNT}.dkr.ecr.${AWS_REGION}.amazonaws.com/${imageName}"
+          sh "\$(aws ecr get-login --no-include-email --region ${AWS_REGION})"
+          sh "docker build -t ${imageName} ."
+          sh "docker tag ${imageName} ${repositoryName}"
         }
       }
     }
   }
+}
+
+def getShortCommitId() {
+    def gitCommit = env.GIT_COMMIT
+    def shortGitCommit = "${gitCommit[0..6]}"
+    return shortGitCommit
+}
+
+def getEnvironment(){
+    if(isDevelop())
+      return "dev"
+
+    if(isRelease())
+      return "qas"
+
+    if(isMaster())
+      return "prd"
+
+    return "dev"
+}
+
+def isMaster() {
+    return env.BRANCH_NAME == "master"
+}
+
+def isRelease() {
+    return env.BRANCH_NAME ==~ '^release\\/[\\w\\d\\.]*$'
+}
+
+def isDevelop() {
+    return env.BRANCH_NAME == "develop"
 }
