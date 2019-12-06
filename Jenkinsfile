@@ -1,11 +1,22 @@
 pipeline {
   agent any
   stages {
-    stage('Bulid') {
-      steps {
-        echo 'Hola mundo'
-      }
+    stage("Building Artifact") { 
+      steps { 
+        sh ''' 
+        #!/bin/bash -xe 
+        cd $WORKSPACE 
+        zip -r $BUILD_TAG.zip * 
+        ''' 
+      } 
     }
-
+    stage("Uploading S3 Artifact") { 
+      steps { 
+        sh ''' 
+        #!/bin/bash -xe 
+        aws s3 mv $BUILD_TAG.zip s3://ci-workshops-devops/yor/Artifact/ --region us-east-1 
+        ''' 
+      } 
+    }
   }
 }
