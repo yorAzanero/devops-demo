@@ -14,7 +14,7 @@ pipeline {
       steps { 
         sh ''' 
         #!/bin/bash -xe 
-        aws s3 mv $BUILD_TAG.zip s3://ci-workshops-devops/yor/Artifact/ --region us-east-1 
+        aws s3 mv $BUILD_TAG.zip s3://ci-workshop-devops/yor/Artifact/ --region us-east-1 
         ''' 
       } 
     }
