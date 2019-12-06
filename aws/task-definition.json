@@ -1,0 +1,61 @@
+  
+{
+    "containerDefinitions": [
+      {
+        "image": "033686261524.dkr.ecr.us-east-1.amazonaws.com/%REPO%",
+        "essential": true,
+        "name": "%CONTAINERNAME%",
+        "cpu": 256,
+        "memory": 512,
+        "portMappings": [
+          {
+            "hostPort": 80,
+            "protocol": "tcp",
+            "containerPort": %CONTAINERPORT%
+          }
+        ]
+      }
+    ],
+    "requiresCompatibilities": [
+      "FARGATE"
+    ],
+    "executionRoleArn": "arn:aws:iam::033686261524:role/ecsTaskExecutionRole",
+    "networkMode": "awsvpc",
+    "cpu": "512",
+    "family": "%TASKDEFINITIONNAME%",
+    "memory": "1024",
+    "tags": [
+      {
+        "key": "Name",
+        "value": "atomo/webapp1"
+      },
+      {
+        "key": "Entorno",
+        "value": "%ENVIRONMENTU%"
+      },
+      {
+        "key": "Grupo",
+        "value": "ATOMO"
+      },
+      {
+        "key": "Server Rol",
+        "value": "WEB"
+      },
+      {
+        "key": "Tipo",
+        "value": "Proyecto"
+      },
+      {
+        "key": "Contacto",
+        "value": "Karina Aguilar"
+      },
+      {
+        "key": "CTLAdmin",
+        "value": "SI"
+      },
+      {
+        "key": "Direccion",
+        "value": "Centro de Soluciones"
+      }
+    ]
+  }
