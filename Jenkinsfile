@@ -34,7 +34,7 @@ pipeline {
     stage("Deploy") {
       steps {
         script {
-          DEPLOYMENT_ID = sh (returnStdout: true, script: 'aws deploy create-deployment --application-name yor --deployment-group-name DEV --s3-location bucket=ci-workshop-devops,key=yor/Artifact/$BUILD_TAG.zip,bundleType=zip --file-exists-behavior OVERWRITE --region us-east-1').trim()     
+          DEPLOYMENT_ID = sh (returnStdout: true, script: 'aws deploy create-deployment --application-name Yor --deployment-group-name DEV --s3-location bucket=ci-workshop-devops,key=Yor/Artifact/$BUILD_TAG.zip,bundleType=zip --file-exists-behavior OVERWRITE --region us-east-1').trim()     
           DEPLOYMENT_OBJECT = jsonParse(DEPLOYMENT_ID)
           echo "Deployment-object is => ${DEPLOYMENT_ID}"
           echo "Deployment-Id is => ${DEPLOYMENT_OBJECT.deploymentId}"
